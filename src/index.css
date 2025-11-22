@@ -1,0 +1,204 @@
+/* ============================================
+   FUENTE GLOBAL
+============================================ */
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+}
+
+/* ============================================
+   TEMAS (CLARO / OSCURO)
+============================================ */
+body.tema-claro {
+  --fondo-login: #ffffff;
+  --texto-login: #222;
+  --fondo-caja: #ffffff;
+  --fondo-lista: #f7f7f7;
+  --borde-input: #ccc;
+  --hover-boton: #3a63d9;
+  background: #f2f2f2;
+  color: #000;
+}
+
+body.tema-oscuro {
+  --fondo-login: #1e1e1e;
+  --texto-login: #f0f0f0;
+  --fondo-caja: #1e1e1e;
+  --fondo-lista: #2a2a2a;
+  --borde-input: #555;
+  --hover-boton: #3a63d9;
+  background: #121212;
+  color: #fff;
+}
+
+/* ============================================
+   LOGIN - CONTENEDOR
+============================================ */
+.login-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ============================================
+   LOGIN - TARJETA PRINCIPAL
+============================================ */
+.login-box {
+  background: var(--fondo-login);
+  color: var(--texto-login);
+  padding: 30px 40px;
+  border-radius: 12px;
+  width: 350px;
+  box-shadow: 0px 0px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: 0.2s;
+}
+
+/* ============================================
+   INPUTS (GENÉRICOS PARA TODA LA APP)
+============================================ */
+input, select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--borde-input);
+  background: var(--fondo-caja);
+  color: var(--texto-login);
+  font-size: 16px;
+  outline: none;
+  transition: 0.2s;
+  width: 100%;
+}
+
+input:focus, select:focus {
+  border-color: #4a78ff;
+  box-shadow: 0 0 4px rgba(74,120,255,0.5);
+}
+
+/* ============================================
+   BOTONES
+============================================ */
+button {
+  padding: 12px;
+  background: #4a78ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: var(--hover-boton);
+}
+
+/* Botón rojo (eliminar) */
+.btn-eliminar {
+  background: #d9534f !important;
+}
+
+.btn-eliminar:hover {
+  background: #c9302c !important;
+}
+
+/* Botón de ancho completo */
+.btn-full {
+  width: 100%;
+}
+
+/* ============================================
+   CAJAS INTERNAS (USUARIOS, PRODUCTOS, CONFIG)
+============================================ */
+.box {
+  background: var(--fondo-caja);
+  color: var(--texto-login);
+  padding: 30px 40px;
+  border-radius: 12px;
+  width: 450px;
+  margin: 40px auto;
+  box-shadow: 0px 0px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: 0.2s;
+}
+
+.box h2 {
+  text-align: center;
+  margin: 0;
+}
+
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formulario label {
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+/* Campo + botón juntos */
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* ============================================
+   LISTAS DE DATOS (USUARIOS / PRODUCTOS)
+============================================ */
+.lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista li {
+  background: var(--fondo-lista);
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  color: var(--texto-login);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 4px solid #4a78ff;
+  transition: 0.2s;
+}
+
+.lista li:hover {
+  transform: translateX(4px);
+}
+
+
+.menu-lateral {
+  width: 220px;
+  height: 100vh;
+  padding: 20px;
+  background: #1e1e1e;
+  color: white;
+  box-sizing: border-box;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.menu-lateral p {
+  padding: 10px 0;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 17px;
+}
+
+.menu-lateral p:hover {
+  color: #4a78ff;
+  transform: translateX(6px);
+}
