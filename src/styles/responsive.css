@@ -1,0 +1,151 @@
+/* Estilos responsivos */
+
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .course-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .schedule-grid {
+    grid-template-columns: 60px repeat(7, 1fr);
+  }
+  
+  .time-slot {
+    font-size: 0.8rem;
+  }
+  
+  .class-item {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .course-header, .schedule-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .course-controls, .schedule-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .search-box input {
+    width: 100%;
+  }
+  
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .settings-layout {
+    flex-direction: column;
+  }
+  
+  .settings-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .settings-tabs button {
+    white-space: nowrap;
+    margin-right: 10px;
+    margin-bottom: 0;
+  }
+  
+  .week-navigation {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .schedule-grid {
+    grid-template-columns: 50px repeat(7, 1fr);
+  }
+  
+  .day-header h3 {
+    font-size: 0.9rem;
+  }
+  
+  .day-header span {
+    font-size: 0.7rem;
+  }
+  
+  .time-slot {
+    font-size: 0.7rem;
+    padding: 10px 5px;
+  }
+  
+  .class-item {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 0 10px;
+  }
+  
+  .logo {
+    font-size: 1.2rem;
+    margin-right: 10px;
+  }
+  
+  .main-content {
+    padding: 15px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-buttons {
+    flex-wrap: wrap;
+  }
+  
+  .schedule-grid {
+    overflow-x: auto;
+  }
+  
+  .day-time-slot {
+    flex-direction: column;
+  }
+  
+  .time-label {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .time-content {
+    padding: 10px;
+  }
+  
+  .class-details {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

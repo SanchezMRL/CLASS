@@ -1,215 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini IMDb - React Hooks</title>
-  <style>
-    :root{
-      --bg:#0f1724; --card:#111827; --muted:#94a3b8; --accent:#fb923c;
-      --glass: rgba(255,255,255,0.03);
-    }
-    body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial; background:linear-gradient(180deg,#071126 0%, #071b2b 100%); color:#e6eef8; }
-    .app{ max-width:1100px; margin:28px auto; padding:18px; }
-    header{ display:flex; align-items:center; gap:16px; margin-bottom:18px;}
-    h1{ margin:0; font-size:20px; letter-spacing:0.4px;}
-    .searchBar{ margin-left:auto; display:flex; gap:8px; }
-    input[type="search"]{ padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:var(--glass); color:inherit; outline:none; min-width:220px;}
-    .controls{ display:flex; gap:8px; align-items:center; margin:12px 0;}
-    select, button{ padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:inherit; cursor:pointer;}
-    main{ display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-top:8px; }
-    .card{ background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); padding:12px; border-radius:12px; box-shadow: 0 4px 14px rgba(2,6,23,0.6); display:flex; gap:10px; align-items:flex-start;}
-    .poster{ width:72px; height:108px; background:#071124; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:12px; overflow:hidden;}
-    .poster img{ width:100%; height:100%; object-fit:cover; display:block;}
-    .meta{ flex:1; }
-    .title{ font-weight:600; font-size:15px; margin:0 0 6px 0;}
-    .sub{ color:var(--muted); font-size:13px; margin-bottom:8px;}
-    .rating{ background:rgba(255,255,255,0.04); padding:6px 8px; border-radius:8px; font-weight:600; display:inline-block; margin-right:6px;}
-    .more{ margin-top:8px; display:flex; gap:8px; }
-    .loadMoreWrapper{ text-align:center; margin:18px 0;}
-    .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.6); padding:16px; z-index:40;}
-    .modalCard{ background:var(--card); padding:18px; border-radius:12px; max-width:900px; width:100%; color:inherit; display:grid; grid-template-columns: 200px 1fr; gap:14px; }
-    .close{ margin-left:auto; background:transparent; border:none; color:var(--muted); font-size:20px; cursor:pointer; }
-    footer{ color:var(--muted); margin-top:18px; text-align:center; font-size:13px;}
-    @media (max-width:640px){ .modalCard{ grid-template-columns: 1fr; } .poster{ display:none; } }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Aula Virtual - Plataforma de aprendizaje en línea creada con React"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
 
-  <!-- React + ReactDOM + Babel (JSX in browser) -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>Aula Virtual</title>
+  </head>
+  <body>
+    <noscript>Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
 
-  <script type="text/babel">
-  const { useState, useEffect, useMemo } = React;
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
 
-  /**
-   * Nota:
-   * - Esta demo usa una API pública de ejemplo: https://api.sampleapis.com/movies/action-adventure
-   * - Puedes cambiar la constante API_URL por otra API (TMDB/OMDB) si tienes clave.
-   */
-
-  const API_URL = 'https://api.sampleapis.com/movies/action-adventure';
-
-  function App(){
-    const [movies, setMovies] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [query, setQuery] = useState('');
-    const [selected, setSelected] = useState(null);
-    const [sortBy, setSortBy] = useState('title');
-    const [page, setPage] = useState(1);
-    const PAGE_SIZE = 12;
-
-    useEffect(() => {
-      let mounted = true;
-      setLoading(true);
-      setError(null);
-      fetch(API_URL)
-        .then(r => {
-          if(!r.ok) throw new Error('Error al consultar API');
-          return r.json();
-        })
-        .then(data => {
-          if(!mounted) return;
-          // normalizar: sampleapis devuelve objetos con title, year, etc.
-          const normalized = data.map(it => ({
-            id: it.id ?? `${it.title}-${it.year}`,
-            title: it.title ?? it.name ?? 'Sin título',
-            year: it.year ?? it.releaseYear ?? '',
-            synopsis: it.plot ?? it.description ?? (it.overview || ''),
-            poster: it.posterURL || it.poster || it.image || '',
-            rating: it.imdbRating ?? it.rating ?? Math.round((Math.random()*4 + 6)*10)/10 // fallback
-          }));
-          setMovies(normalized);
-        })
-        .catch(err => {
-          console.error(err);
-          setError('No se pudo cargar la lista. Prueba más tarde.');
-        })
-        .finally(() => { if(mounted) setLoading(false); });
-      return () => { mounted=false; };
-    }, []);
-
-    const filtered = useMemo(()=>{
-      const q = query.trim().toLowerCase();
-      let res = movies.filter(m =>
-        !q || m.title.toLowerCase().includes(q) || (m.synopsis||'').toLowerCase().includes(q)
-      );
-      if(sortBy === 'title') res = res.sort((a,b)=> a.title.localeCompare(b.title));
-      if(sortBy === 'year') res = res.sort((a,b)=> (b.year||0) - (a.year||0));
-      if(sortBy === 'rating') res = res.sort((a,b)=> (b.rating||0) - (a.rating||0));
-      return res;
-    }, [movies, query, sortBy]);
-
-    // simple pagination
-    const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-    const visible = filtered.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
-
-    function openDetail(m){ setSelected(m); }
-    function closeDetail(){ setSelected(null); }
-
-    return (
-      <div className="app">
-        <header>
-          <div>
-            <h1>MiniIMDb — Películas</h1>
-            <div style={{color:'var(--muted)', fontSize:13}}>Interfaz demo con React Hooks · Fuente: sampleapis.com</div>
-          </div>
-
-          <div className="searchBar">
-            <input
-              type="search"
-              placeholder="Buscar título o sinopsis..."
-              value={query}
-              onChange={e => { setQuery(e.target.value); setPage(1); }}
-            />
-            <button onClick={() => { setQuery(''); setPage(1); }}>Limpiar</button>
-          </div>
-        </header>
-
-        <div className="controls">
-          <div style={{color:'var(--muted)'}}>{filtered.length} resultados</div>
-          <div style={{marginLeft:'auto', display:'flex', gap:8}}>
-            <label style={{color:'var(--muted)', fontSize:13, alignSelf:'center'}}>Ordenar:</label>
-            <select value={sortBy} onChange={e=>setSortBy(e.target.value)}>
-              <option value="title">Título (A-Z)</option>
-              <option value="year">Año (desc)</option>
-              <option value="rating">Rating (desc)</option>
-            </select>
-            <button onClick={()=> { setPage(1); setQuery(''); }}>Reset</button>
-          </div>
-        </div>
-
-        {loading && <div style={{color:'var(--muted)'}}>Cargando películas…</div>}
-        {error && <div style={{color:'#ffb4a2'}}>{error}</div>}
-
-        <main>
-          {visible.map(m => (
-            <article className="card" key={m.id}>
-              <div className="poster">
-                {m.poster ? <img src={m.poster} alt={m.title} onError={(e)=>e.target.style.display='none'} /> : <div style={{padding:8,textAlign:'center'}}>&#127916;<br/><small style={{color:'var(--muted)'}}>No poster</small></div>}
-              </div>
-
-              <div className="meta">
-                <div style={{display:'flex', alignItems:'center', gap:8}}>
-                  <h3 className="title">{m.title}</h3>
-                  <div style={{color:'var(--muted)', fontSize:13}}>({m.year})</div>
-                </div>
-
-                <div className="sub">
-                  <span className="rating">⭐ {m.rating ?? '—'}</span>
-                  <span style={{color:'var(--muted)'}}>{(m.synopsis || '').slice(0,140)}{(m.synopsis||'').length>140 ? '…' : ''}</span>
-                </div>
-
-                <div className="more">
-                  <button onClick={()=>openDetail(m)}>Ver detalle</button>
-                  <a href={"https://www.google.com/search?q="+encodeURIComponent(m.title+" pelicula")} target="_blank" rel="noreferrer"><button>Buscar web</button></a>
-                </div>
-              </div>
-            </article>
-          ))}
-        </main>
-
-        <div className="loadMoreWrapper">
-          <div style={{display:'flex', gap:8, justifyContent:'center', alignItems:'center'}}>
-            <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1}>◀ Anterior</button>
-            <div style={{alignSelf:'center', color:'var(--muted)'}}>Página {page} / {pageCount}</div>
-            <button onClick={()=>setPage(p=>Math.min(pageCount,p+1))} disabled={page===pageCount}>Siguiente ▶</button>
-          </div>
-        </div>
-
-        <footer>Demo rápido · Cambia <code>API_URL</code> en el código para usar otra fuente (TMDB/OMDB con key).</footer>
-
-        {selected && (
-          <div className="modal" onClick={closeDetail}>
-            <div className="modalCard" onClick={e=>e.stopPropagation()}>
-              <div style={{borderRadius:8, overflow:'hidden'}}>
-                {selected.poster ? <img src={selected.poster} alt="" style={{width:'100%', height:'100%', objectFit:'cover'}}/> : <div style={{padding:12,color:'var(--muted)'}}>No poster</div>}
-              </div>
-              <div>
-                <div style={{display:'flex', gap:8, alignItems:'center'}}>
-                  <h2 style={{margin:0}}>{selected.title}</h2>
-                  <div style={{color:'var(--muted)'}}>({selected.year})</div>
-                  <button className="close" onClick={closeDetail} aria-label="Cerrar">✕</button>
-                </div>
-                <p style={{color:'var(--muted)', marginTop:10}}>{selected.synopsis || 'Sin sinopsis disponible.'}</p>
-                <p style={{marginTop:10}}>⭐ <strong>{selected.rating}</strong></p>
-                <div style={{marginTop:12, display:'flex', gap:8}}>
-                  <a href={"https://www.google.com/search?q="+encodeURIComponent(selected.title+" pelicula")} target="_blank" rel="noreferrer"><button>Buscar en la web</button></a>
-                  <button onClick={() => { navigator.clipboard?.writeText(selected.title); alert('Título copiado al portapapeles') }}>Copiar título</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
-</body>
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
 </html>
