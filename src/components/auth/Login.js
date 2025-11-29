@@ -1,30 +1,30 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
+import React, { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
-    
+
     try {
       const result = await login(email, password);
       if (result.success) {
-        navigate('/');
+        navigate("/");
       } else {
-        setError(result.message || 'Credenciales incorrectas');
+        setError(result.message || "Credenciales incorrectas");
       }
     } catch (err) {
-      setError('Error de conexión. Inténtalo de nuevo más tarde.');
+      setError("Error de conexión. Inténtalo de nuevo más tarde.");
     } finally {
       setIsLoading(false);
     }
@@ -57,13 +57,15 @@ const Login = () => {
             />
           </div>
           <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
         </form>
         <div className="demo-credentials">
-          <p>Credenciales de demostración:</p>
-          <p>Email: demo@aulavirtual.com</p>
-          <p>Contraseña: demo123</p>
+          <p><strong>Credenciales de demostración:</strong></p>
+          <p><strong>Profesor:</strong></p>
+          <p>Email: profesor@aulavirtual.com | Contraseña: profesor123</p>
+          <p><strong>Alumno:</strong></p>
+          <p>Email: alumno@aulavirtual.com | Contraseña: alumno123</p>
         </div>
       </div>
     </div>

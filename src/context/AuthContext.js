@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService';
+import React, { createContext, useState, useEffect } from "react";
+import { authService } from "../services/authService";
 
 export const AuthContext = createContext();
 
@@ -11,14 +11,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (token) {
           const userData = await authService.verifyToken(token);
           setUser(userData);
           setIsAuthenticated(true);
         }
       } catch (error) {
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(email, password);
       if (response.success) {
         localStorage.setItem('token', response.token);
+        localStorage.setItem('userData', JSON.stringify(response.user));
         setUser(response.user);
         setIsAuthenticated(true);
         return { success: true };
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userData');
     setUser(null);
     setIsAuthenticated(false);
   };
@@ -64,14 +66,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      loading,
-      login,
-      logout,
-      updateProfile
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        loading,
+        login,
+        logout,
+        updateProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

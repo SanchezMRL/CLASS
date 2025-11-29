@@ -1,9 +1,9 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React from "react";
+import { NavLink } from "react-router-dom";
 
 const Sidebar = ({ isOpen }) => {
   return (
-    <aside className={`sidebar ${isOpen ? '' : 'collapsed'}`}>
+    <aside className={`sidebar ${isOpen ? "" : "collapsed"}`}>
       <nav className="sidebar-nav">
         <NavLink to="/" className="sidebar-nav-item">
           <span className="sidebar-nav-icon">&#127968;</span>

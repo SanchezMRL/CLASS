@@ -2,23 +2,34 @@
 const users = [
   {
     id: 1,
-    name: 'Usuario Demo',
-    email: 'demo@aulavirtual.com',
-    password: 'demo123',
-    phone: '+34 600 000 000',
-    bio: 'Estudiante de ejemplo en el Aula Virtual'
-  }
+    name: "Profesor Demo",
+    email: "profesor@aulavirtual.com",
+    password: "profesor123",
+    phone: "+34 600 000 000",
+    bio: "Profesor de ejemplo en el Aula Virtual",
+    role: "profesor",
+  },
+  {
+    id: 2,
+    name: "Alumno Demo",
+    email: "alumno@aulavirtual.com",
+    password: "alumno123",
+    phone: "+34 600 000 001",
+    bio: "Estudiante de ejemplo en el Aula Virtual",
+    role: "alumno",
+  },
 ];
 
 const authService = {
   login: async (email, password) => {
-    // Simulación de llamada a API
     return new Promise((resolve) => {
       setTimeout(() => {
-        const user = users.find(u => u.email === email && u.password === password);
-        
+        const user = users.find(
+          (u) => u.email === email && u.password === password
+        );
+
         if (user) {
-          const token = 'fake-jwt-token-' + Date.now();
+          const token = "fake-jwt-token-" + Date.now();
           resolve({
             success: true,
             token,
@@ -27,13 +38,14 @@ const authService = {
               name: user.name,
               email: user.email,
               phone: user.phone,
-              bio: user.bio
-            }
+              bio: user.bio,
+              role: user.role,
+            },
           });
         } else {
           resolve({
             success: false,
-            message: 'Credenciales incorrectas'
+            message: "Credenciales incorrectas",
           });
         }
       }, 1000);
@@ -41,23 +53,26 @@ const authService = {
   },
 
   verifyToken: async (token) => {
-    // Simulación de verificación de token
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (token && token.startsWith('fake-jwt-token')) {
-          resolve(users[0]);
+        if (token && token.startsWith("fake-jwt-token")) {
+          const userData = localStorage.getItem('userData');
+          if (userData) {
+            resolve(JSON.parse(userData));
+          } else {
+            resolve(users[0]);
+          }
         } else {
-          reject(new Error('Token inválido'));
+          reject(new Error("Token inválido"));
         }
       }, 500);
     });
   },
 
   updateProfile: async (profileData) => {
-    // Simulación de actualización de perfil
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userIndex = users.findIndex(u => u.id === 1);
+        const userIndex = users.findIndex((u) => u.id === 1);
         if (userIndex !== -1) {
           users[userIndex] = { ...users[userIndex], ...profileData };
           resolve({
@@ -67,18 +82,18 @@ const authService = {
               name: users[userIndex].name,
               email: users[userIndex].email,
               phone: users[userIndex].phone,
-              bio: users[userIndex].bio
-            }
+              bio: users[userIndex].bio,
+            },
           });
         } else {
           resolve({
             success: false,
-            message: 'Usuario no encontrado'
+            message: "Usuario no encontrado",
           });
         }
       }, 1000);
     });
-  }
+  },
 };
 
 export { authService };

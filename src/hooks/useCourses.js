@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { courseService } from '../services/courseService';
+import { useState, useEffect } from "react";
+import { courseService } from "../services/courseService";
 
 export const useCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -35,9 +35,9 @@ export const useCourses = () => {
   const updateCourse = async (id, courseData) => {
     try {
       const updatedCourse = await courseService.updateCourse(id, courseData);
-      setCourses(courses.map(course => 
-        course.id === id ? updatedCourse : course
-      ));
+      setCourses(
+        courses.map((course) => (course.id === id ? updatedCourse : course))
+      );
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };
@@ -47,7 +47,7 @@ export const useCourses = () => {
   const deleteCourse = async (id) => {
     try {
       await courseService.deleteCourse(id);
-      setCourses(courses.filter(course => course.id !== id));
+      setCourses(courses.filter((course) => course.id !== id));
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };
@@ -60,6 +60,6 @@ export const useCourses = () => {
     error,
     addCourse,
     updateCourse,
-    deleteCourse
+    deleteCourse,
   };
 };
