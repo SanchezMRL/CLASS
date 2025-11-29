@@ -80,7 +80,7 @@ const scheduleItems = [
 ];
 
 const scheduleService = {
-  getAllSchedules: async () => {
+  getSchedule: async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(scheduleItems);
@@ -131,7 +131,7 @@ const scheduleService = {
     });
   },
 
-  deleteSchedule: async (id) => {
+  deleteScheduleItem: async (id) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const itemIndex = scheduleItems.findIndex((i) => i.id === parseInt(id));
