@@ -22,6 +22,27 @@ const CourseList = () => {
     return matchesFilter && matchesSearch;
   });
 
+
+  const getButtonStyle = (isActive) => ({
+    padding: '10px 15px',
+    backgroundColor: isActive ? 'var(--primary-color)' : '#f8f9fa',
+    color: isActive ? 'white' : '#333',
+    border: `1px solid ${isActive ? 'var(--primary-color)' : '#ccc'}`,
+    borderRadius: 'var(--border-radius)',
+    cursor: 'pointer',
+    fontWeight: '500',
+    transition: 'all 0.2s ease-in-out',
+    marginRight: '10px' 
+  });
+
+  const filterOptions = [
+    { key: 'all', label: 'Todos' },
+    { key: 'active', label: 'Activos' },
+    { key: 'completed', label: 'Completados' },
+  ];
+
+
+
   return (
     <div className="course-container">
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
@@ -43,26 +64,25 @@ const CourseList = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              
+              {
+
+              }
               <div className="filter-buttons">
-                <button
-                  className={filter === "all" ? "active" : ""}
-                  onClick={() => setFilter("all")}
-                >
-                  Todos
-                </button>
-                <button
-                  className={filter === "active" ? "active" : ""}
-                  onClick={() => setFilter("active")}
-                >
-                  Activos
-                </button>
-                <button
-                  className={filter === "completed" ? "active" : ""}
-                  onClick={() => setFilter("completed")}
-                >
-                  Completados
-                </button>
+                {filterOptions.map(option => (
+                  <button
+                    key={option.key}
+                    // 3. Aplicamos el estilo directamente aquí
+                    style={getButtonStyle(filter === option.key)}
+                    onClick={() => setFilter(option.key)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
+              {
+              }
+
             </div>
           </div>
           {loading ? (
