@@ -8,7 +8,7 @@ const courses = [
     students: 125,
     progress: 75,
     completed: false,
-    image: "https://picsum.photos/seed/react/300/200.jpg",
+    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
     description:
       "Aprende los fundamentos de React y crea aplicaciones web interactivas.",
   },
@@ -20,7 +20,7 @@ const courses = [
     students: 98,
     progress: 60,
     completed: false,
-    image: "https://picsum.photos/seed/javascript/300/200.jpg",
+    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
     description:
       "Domina los conceptos avanzados de JavaScript y patrones de diseño.",
   },
@@ -32,7 +32,7 @@ const courses = [
     students: 150,
     progress: 100,
     completed: true,
-    image: "https://picsum.photos/seed/css/300/200.jpg",
+    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
     description:
       "Crea diseños web atractivos y adaptables a cualquier dispositivo.",
   },
@@ -44,7 +44,7 @@ const courses = [
     students: 87,
     progress: 40,
     completed: false,
-    image: "https://picsum.photos/seed/nodejs/300/200.jpg",
+    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
     description:
       "Desarrolla aplicaciones del lado del servidor con Node.js y Express.",
   },
@@ -56,7 +56,7 @@ const courses = [
     students: 110,
     progress: 90,
     completed: false,
-    image: "https://picsum.photos/seed/sql/300/200.jpg",
+    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
     description:
       "Aprende a diseñar y gestionar bases de datos relacionales con SQL.",
   },
