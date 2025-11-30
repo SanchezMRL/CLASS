@@ -1,98 +1,141 @@
-// Simulación de servicio de autenticación
-const users = [
-  {
-    id: 1,
-    name: "Profesor Demo",
-    email: "profesor@aulavirtual.com",
-    password: "profesor123",
-    phone: "+34 600 000 000",
-    bio: "Profesor de ejemplo en el Aula Virtual",
-    role: "profesor",
-  },
-  {
-    id: 2,
-    name: "Alumno Demo",
-    email: "alumno@aulavirtual.com",
-    password: "alumno123",
-    phone: "+34 600 000 001",
-    bio: "Estudiante de ejemplo en el Aula Virtual",
-    role: "alumno",
-  },
-];
+import { supabase } from '../lib/supabaseClient';
 
 const authService = {
   login: async (email, password) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const user = users.find(
-          (u) => u.email === email && u.password === password
-        );
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (user) {
-          const token = "fake-jwt-token-" + Date.now();
-          resolve({
-            success: true,
-            token,
-            user: {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              phone: user.phone,
-              bio: user.bio,
-              role: user.role,
-            },
-          });
-        } else {
-          resolve({
-            success: false,
-            message: "Credenciales incorrectas",
-          });
-        }
-      }, 1000);
-    });
+      if (error) {
+        return {
+          success: false,
+          message: error.message === 'Invalid login credentials' 
+            ? 'Credenciales incorrectas' 
+            : error.message,
+        };
+      }
+
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (userError) {
+        return {
+          success: false,
+          message: 'Error al obtener datos del usuario',
+        };
+      }
+
+      return {
+        success: true,
+        token: data.session.access_token,
+        user: {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          bio: userData.bio,
+          role: userData.role,
+          avatar_url: userData.avatar_url,
+        },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: 'Error de conexión',
+      };
+    }
   },
 
   verifyToken: async (token) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (token && token.startsWith("fake-jwt-token")) {
-          const userData = localStorage.getItem('userData');
-          if (userData) {
-            resolve(JSON.parse(userData));
-          } else {
-            resolve(users[0]);
-          }
-        } else {
-          reject(new Error("Token inválido"));
-        }
-      }, 500);
-    });
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        throw new Error('Token inválido');
+      }
+
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (userError) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      return userData;
+    } catch (err) {
+      throw err;
+    }
   },
 
   updateProfile: async (profileData) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const userIndex = users.findIndex((u) => u.id === 1);
-        if (userIndex !== -1) {
-          users[userIndex] = { ...users[userIndex], ...profileData };
-          resolve({
-            success: true,
-            user: {
-              id: users[userIndex].id,
-              name: users[userIndex].name,
-              email: users[userIndex].email,
-              phone: users[userIndex].phone,
-              bio: users[userIndex].bio,
-            },
-          });
-        } else {
-          resolve({
-            success: false,
-            message: "Usuario no encontrado",
-          });
-        }
-      }, 1000);
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        return {
+          success: false,
+          message: 'Usuario no autenticado',
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          name: profileData.name,
+          phone: profileData.phone,
+          bio: profileData.bio,
+        })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        return {
+          success: false,
+          message: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        user: data,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: 'Error al actualizar perfil',
+      };
+    }
+  },
+
+  logout: async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return { success: true };
+    } catch (err) {
+      return {
+        success: false,
+        message: 'Error al cerrar sesión',
+      };
+    }
+  },
+
+  getCurrentUser: async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    } catch (err) {
+      return null;
+    }
   },
 };
 

@@ -1,10 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { resourceService } from '../../services/resourceService';
 
 const AssignmentDetailModal = ({ isOpen, onClose, assignment, onSubmit }) => {
   const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [comments, setComments] = useState('');
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Cargar submissions cuando se abre el modal
+  useEffect(() => {
+    const loadSubmissions = async () => {
+      if (!isOpen || !assignment) {
+        setSubmissions([]);
+        return;
+      }
+
+      console.log('🎯 AssignmentDetailModal - assignment:', assignment);
+      console.log('📦 Submissions en assignment.submissions:', assignment.submissions);
+
+      // Intentar primero con las submissions del assignment
+      if (assignment.submissions && Array.isArray(assignment.submissions) && assignment.submissions.length > 0) {
+        console.log('✅ Usando submissions del assignment');
+        setSubmissions(assignment.submissions);
+      } else {
+        // Si no hay submissions en el assignment, cargarlas directamente
+        console.log('⏳ Cargando submissions desde la BD...');
+        setLoading(true);
+        try {
+          const subs = await resourceService.getSubmissions(assignment.id);
+          console.log('✅ Submissions cargadas:', subs);
+          setSubmissions(subs || []);
+        } catch (err) {
+          console.error('❌ Error al cargar entregas:', err);
+          setSubmissions([]);
+        }
+        setLoading(false);
+      }
+    };
+
+    loadSubmissions();
+  }, [isOpen, assignment]);
 
   if (!isOpen || !assignment) return null;
 
@@ -36,8 +73,15 @@ const AssignmentDetailModal = ({ isOpen, onClose, assignment, onSubmit }) => {
     });
   };
 
-  const isSubmitted = assignment.submissions && assignment.submissions.some(s => s.studentId === user.id);
-  const userSubmission = assignment.submissions?.find(s => s.studentId === user.id);
+  // Verificar si el usuario actual (alumno) ya entregó
+  const userSubmission = user.role === 'alumno' 
+    ? submissions.find(s => s.studentId === user.id) 
+    : null;
+  const isSubmitted = !!userSubmission;
+
+  console.log('👤 Usuario:', user.id, user.name, user.role);
+  console.log('📝 userSubmission:', userSubmission);
+  console.log('✅ isSubmitted:', isSubmitted);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -146,17 +190,25 @@ const AssignmentDetailModal = ({ isOpen, onClose, assignment, onSubmit }) => {
 
           {user.role === 'profesor' && (
             <div className="assignment-section">
-              <h3>Entregas de estudiantes ({assignment.submissions?.length || 0})</h3>
-              {assignment.submissions && assignment.submissions.length > 0 ? (
+              <h3>Entregas de estudiantes ({submissions.length})</h3>
+              {submissions.length > 0 ? (
                 <div className="submissions-list">
-                  {assignment.submissions.map((submission) => (
+                  {submissions.map((submission) => (
                     <div key={submission.id} className="submission-item">
                       <div>
-                        <strong>{submission.studentName}</strong>
+                        <strong>{submission.studentName || 'Sin nombre'}</strong>
+                        <p className="submission-email">{submission.studentEmail || ''}</p>
                         <p>Entregado: {formatDate(submission.submittedAt)}</p>
                         {submission.comments && <p>Comentarios: {submission.comments}</p>}
                       </div>
-                      <button className="view-button">Ver entrega</button>
+                      {submission.file && (
+                        <button 
+                          className="view-button"
+                          onClick={() => window.open(submission.file, '_blank')}
+                        >
+                          Descargar entrega
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

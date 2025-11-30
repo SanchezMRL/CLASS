@@ -23,7 +23,7 @@ const AddResourceModal = ({ isOpen, onClose, onAdd, weekNumber, topicId }) => {
       type: resourceType,
       title: formData.title,
       description: resourceType === 'pdf' ? `Material · ${formData.description}` : formData.description,
-      url: formData.file ? URL.createObjectURL(formData.file) : '#',
+      file: formData.file, // Pasar el archivo real, no la URL temporal
       deadline: resourceType === 'assignment' && formData.deadline.from && formData.deadline.to 
         ? formData.deadline 
         : null,
@@ -32,6 +32,7 @@ const AddResourceModal = ({ isOpen, onClose, onAdd, weekNumber, topicId }) => {
       submissions: resourceType === 'assignment' ? [] : undefined
     };
 
+    console.log('Enviando recurso con archivo:', resourceData.file);
     onAdd(resourceData);
     handleClose();
   };

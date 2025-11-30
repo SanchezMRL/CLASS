@@ -44,7 +44,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await authService.logout();
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
     setUser(null);

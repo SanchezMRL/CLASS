@@ -1,131 +1,203 @@
-// Simulación de servicio de cursos
-const courses = [
-  {
-    id: 1,
-    name: "Introducción a React",
-    instructor: "Prof. Juan Pérez",
-    duration: "8 semanas",
-    students: 125,
-    progress: 75,
-    completed: false,
-    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
-    description:
-      "Aprende los fundamentos de React y crea aplicaciones web interactivas.",
-  },
-  {
-    id: 2,
-    name: "JavaScript Avanzado",
-    instructor: "Prof. María García",
-    duration: "10 semanas",
-    students: 98,
-    progress: 60,
-    completed: false,
-    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
-    description:
-      "Domina los conceptos avanzados de JavaScript y patrones de diseño.",
-  },
-  {
-    id: 3,
-    name: "CSS y Diseño Responsivo",
-    instructor: "Prof. Ana López",
-    duration: "6 semanas",
-    students: 150,
-    progress: 100,
-    completed: true,
-    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
-    description:
-      "Crea diseños web atractivos y adaptables a cualquier dispositivo.",
-  },
-  {
-    id: 4,
-    name: "Node.js y Express",
-    instructor: "Prof. Carlos Martínez",
-    duration: "8 semanas",
-    students: 87,
-    progress: 40,
-    completed: false,
-    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
-    description:
-      "Desarrolla aplicaciones del lado del servidor con Node.js y Express.",
-  },
-  {
-    id: 5,
-    name: "Bases de Datos SQL",
-    instructor: "Prof. Laura Rodríguez",
-    duration: "7 semanas",
-    students: 110,
-    progress: 90,
-    completed: false,
-    image: "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
-    description:
-      "Aprende a diseñar y gestionar bases de datos relacionales con SQL.",
-  },
-];
+import { supabase } from '../lib/supabaseClient';
 
 const courseService = {
   getAllCourses: async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(courses);
-      }, 800);
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('Usuario no autenticado');
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      let coursesData = [];
+
+      if (userData.role === 'alumno') {
+        const { data, error } = await supabase
+          .from('enrollments')
+          .select(`
+            course_id,
+            courses (
+              id,
+              name,
+              description,
+              duration,
+              image_url,
+              created_at
+            )
+          `)
+          .eq('student_id', user.id);
+
+        if (error) throw error;
+        coursesData = data.map(enrollment => enrollment.courses);
+      } else if (userData.role === 'profesor') {
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('instructor_id', user.id);
+
+        if (error) throw error;
+        coursesData = data;
+      }
+
+      const coursesWithCounts = await Promise.all(
+        coursesData.map(async (course) => {
+          const { count } = await supabase
+            .from('enrollments')
+            .select('*', { count: 'exact', head: true })
+            .eq('course_id', course.id);
+
+          return {
+            id: course.id,
+            name: course.name,
+            instructor: 'Profesor Demo',
+            duration: course.duration || '18 semanas',
+            students: count || 0,
+            progress: 0,
+            completed: false,
+            image: course.image_url || "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
+            description: course.description,
+          };
+        })
+      );
+
+      return coursesWithCounts;
+    } catch (err) {
+      console.error('Error al obtener cursos:', err);
+      return [];
+    }
   },
 
   getCourseById: async (id) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const course = courses.find((c) => c.id === parseInt(id));
-        if (course) {
-          resolve(course);
-        } else {
-          reject(new Error("Curso no encontrado"));
-        }
-      }, 500);
-    });
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      const { count } = await supabase
+        .from('enrollments')
+        .select('*', { count: 'exact', head: true })
+        .eq('course_id', id);
+
+      return {
+        id: data.id,
+        name: data.name,
+        instructor: 'Profesor Demo',
+        duration: data.duration || '18 semanas',
+        students: count || 0,
+        progress: 0,
+        completed: false,
+        image: data.image_url || "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
+        description: data.description,
+      };
+    } catch (err) {
+      console.error('Error al obtener curso:', err);
+      throw new Error("Curso no encontrado");
+    }
   },
 
   createCourse: async (courseData) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newCourse = {
-          id: courses.length + 1,
-          ...courseData,
-          progress: 0,
-          completed: false,
-          students: 0,
-        };
-        courses.push(newCourse);
-        resolve(newCourse);
-      }, 1000);
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('Usuario no autenticado');
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('name, role')
+        .eq('id', user.id)
+        .single();
+
+      if (userData.role !== 'profesor') {
+        throw new Error('Solo los profesores pueden crear cursos');
+      }
+
+      const { data, error } = await supabase
+        .from('courses')
+        .insert({
+          name: courseData.name,
+          description: courseData.description,
+          duration: courseData.duration || '18 semanas',
+          instructor_id: user.id,
+          image_url: courseData.image || "https://img.freepik.com/vector-premium/estudiantes-estan-estudiando-obtener-titulo_118167-2421.jpg",
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: data.id,
+        name: data.name,
+        instructor: 'Profesor Demo',
+        duration: data.duration,
+        students: 0,
+        progress: 0,
+        completed: false,
+        image: data.image_url,
+        description: data.description,
+      };
+    } catch (err) {
+      console.error('Error al crear curso:', err);
+      throw err;
+    }
   },
 
   updateCourse: async (id, courseData) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const courseIndex = courses.findIndex((c) => c.id === parseInt(id));
-        if (courseIndex !== -1) {
-          courses[courseIndex] = { ...courses[courseIndex], ...courseData };
-          resolve(courses[courseIndex]);
-        } else {
-          reject(new Error("Curso no encontrado"));
-        }
-      }, 1000);
-    });
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .update({
+          name: courseData.name,
+          description: courseData.description,
+          duration: courseData.duration,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: data.id,
+        name: data.name,
+        instructor: 'Profesor Demo',
+        duration: data.duration,
+        description: data.description,
+        image: data.image_url,
+        progress: courseData.progress,
+        completed: courseData.completed,
+        students: courseData.students,
+      };
+    } catch (err) {
+      console.error('Error al actualizar curso:', err);
+      throw new Error("Curso no encontrado");
+    }
   },
 
   deleteCourse: async (id) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const courseIndex = courses.findIndex((c) => c.id === parseInt(id));
-        if (courseIndex !== -1) {
-          courses.splice(courseIndex, 1);
-          resolve();
-        } else {
-          reject(new Error("Curso no encontrado"));
-        }
-      }, 800);
-    });
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error al eliminar curso:', err);
+      throw new Error("Curso no encontrado");
+    }
   },
 };
 
