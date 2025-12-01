@@ -8,9 +8,31 @@ const Header = ({ toggleSidebar }) => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
+  const [profilePictureUrl, setProfilePictureUrl] = useState(user?.profilePicture || null);
+  const fileInputRef = useRef(null);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      setProfilePictureUrl(localUrl);
+
+      // Lógica para subir la imagen al servidor
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+      // fetch('/api/user/profile-picture', { method: 'POST', body: formData })
+      //   .then(response => response.json())
+      //   .then(data => setProfilePictureUrl(data.profilePictureUrl));
+    }
+  };
+
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
   };
 
   useEffect(() => {
@@ -45,12 +67,20 @@ const Header = ({ toggleSidebar }) => {
           onMouseLeave={() => setIsDropdownOpen(false)}
         >
           <div className="user-avatar">
-            {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+            {profilePictureUrl ? (
+              <img src={profilePictureUrl} alt="Profile" className="avatar-img" />
+            ) : (
+              user?.name ? user.name.charAt(0).toUpperCase() : "U"
+            )}
           </div>
           <div className={`user-dropdown ${isDropdownOpen ? 'show' : ''}`}>
             <div className="user-dropdown-header">
               <div className="user-dropdown-avatar">
-                {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                {profilePictureUrl ? (
+                  <img src={profilePictureUrl} alt="Profile" className="avatar-img" />
+                ) : (
+                  user?.name ? user.name.charAt(0).toUpperCase() : "U"
+                )}
               </div>
               <div className="user-dropdown-info">
                 <div className="user-dropdown-name">{user?.name}</div>
@@ -62,6 +92,18 @@ const Header = ({ toggleSidebar }) => {
                 )}
               </div>
             </div>
+            <div className="user-dropdown-divider"></div>
+            <button className="user-dropdown-item" onClick={triggerFileSelect}>
+              <span className="change-photo-icon">📷</span>
+              Cambiar Foto de Perfil
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+              accept="image/png, image/jpeg, image/webp"
+            />
             <div className="user-dropdown-divider"></div>
             <button className="user-dropdown-item logout-item" onClick={handleLogout}>
               <span className="logout-icon">🚪</span>
