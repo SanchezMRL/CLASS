@@ -211,6 +211,8 @@ input:focus, select:focus, textarea:focus {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid transparent;
+  position: relative; 
+  overflow: hidden; 
 }
 
 .user-avatar:hover {
@@ -1436,12 +1438,11 @@ input:focus, select:focus, textarea:focus {
   border-color: #adb5bd;
 }
 
-
-/* --- ESTILOS PARA LA IMAGEN DE PERFIL --- */
 .avatar-img {
+  position: absolute; /* ¡Esto posiciona la imagen! */
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 50%; /* Mantiene la forma redondeada */
-  object-fit: cover; /* Hace que la imagen cubra el espacio sin deformarse */
-  display: block;
+  object-fit: cover; /* Esto recorta la imagen para que llene el círculo */
 }
