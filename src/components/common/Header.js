@@ -8,7 +8,12 @@ const Header = ({ toggleSidebar }) => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  const [profilePictureUrl, setProfilePictureUrl] = useState(user?.profilePicture || null);
+  // --- NUEVO: Leemos la foto guardada en localStorage al cargar el componente ---
+  const [profilePictureUrl, setProfilePictureUrl] = useState(() => {
+    const savedPicture = localStorage.getItem('userProfilePicture');
+    return savedPicture || user?.avatar_url || null;
+  });
+
   const fileInputRef = useRef(null);
 
   const handleLogout = () => {
@@ -16,18 +21,24 @@ const Header = ({ toggleSidebar }) => {
     navigate('/login');
   };
 
+  // --- MODIFICADO: Ahora guardamos la imagen en localStorage ---
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const localUrl = URL.createObjectURL(file);
-      setProfilePictureUrl(localUrl);
+      const reader = new FileReader();
 
-      // Lógica para subir la imagen al servidor
-      const formData = new FormData();
-      formData.append('profilePicture', file);
-      // fetch('/api/user/profile-picture', { method: 'POST', body: formData })
-      //   .then(response => response.json())
-      //   .then(data => setProfilePictureUrl(data.profilePictureUrl));
+      reader.onloadend = () => {
+        // reader.result es la imagen en formato Base64 (un texto largo)
+        const base64String = reader.result;
+        
+        // 1. Guardamos la imagen en localStorage para que persista
+        localStorage.setItem('userProfilePicture', base64String);
+        
+        // 2. Actualizamos el estado para verla inmediatamente
+        setProfilePictureUrl(base64String);
+      };
+
+      reader.readAsDataURL(file); // Inicia la lectura del archivo
     }
   };
 
@@ -43,11 +54,11 @@ const Header = ({ toggleSidebar }) => {
     };
 
     if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
@@ -60,20 +71,21 @@ const Header = ({ toggleSidebar }) => {
         <div className="logo">Aula Virtual</div>
       </div>
       <div className="header-right">
-        <div 
-          className="user-menu" 
+        <div
+          className="user-menu"
           ref={dropdownRef}
           onMouseEnter={() => setIsDropdownOpen(true)}
           onMouseLeave={() => setIsDropdownOpen(false)}
         >
           <div className="user-avatar">
             {profilePictureUrl ? (
+              // --- NUEVO: La etiqueta img con estilos para que se ajuste ---
               <img src={profilePictureUrl} alt="Profile" className="avatar-img" />
             ) : (
               user?.name ? user.name.charAt(0).toUpperCase() : "U"
             )}
           </div>
-          <div className={`user-dropdown ${isDropdownOpen ? 'show' : ''}`}>
+          <div className={`user-dropdown ${isDropdownOpen ? "show" : ""}`}>
             <div className="user-dropdown-header">
               <div className="user-dropdown-avatar">
                 {profilePictureUrl ? (
@@ -87,7 +99,7 @@ const Header = ({ toggleSidebar }) => {
                 <div className="user-dropdown-email">{user?.email}</div>
                 {user?.role && (
                   <div className="user-dropdown-role">
-                    {user.role === 'profesor' ? '👨‍🏫 Profesor' : '👨‍🎓 Alumno'}
+                    {user.role === "profesor" ? "👨‍🏫 Profesor" : "👨‍🎓 Alumno"}
                   </div>
                 )}
               </div>
@@ -101,7 +113,7 @@ const Header = ({ toggleSidebar }) => {
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
               accept="image/png, image/jpeg, image/webp"
             />
             <div className="user-dropdown-divider"></div>
