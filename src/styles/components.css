@@ -1,4 +1,45 @@
-/* Estilos para componentes específicos */
+/* ==========================================================================
+   Estilos globales y variables
+   ========================================================================== */
+:root {
+  --primary-color: #4a6cf7;
+  --primary-dark: #3a5ce5;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --sidebar-width: 250px;
+  --header-height: 60px;
+  --border-radius: 6px;
+  --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fb;
+  color: #333;
+  line-height: 1.6;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   Estilos para componentes específicos
+   ========================================================================== */
 
 /* Header */
 .header {
@@ -16,11 +57,7 @@
   padding: 0 20px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
+.header-left,
 .header-right {
   display: flex;
   align-items: center;
@@ -56,37 +93,117 @@
   justify-content: center;
   font-weight: bold;
   cursor: pointer;
+  overflow: hidden; /* Asegura que la imagen no se salga del círculo */
+}
+
+/* Estilos para la imagen de perfil en el avatar */
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover; /* Hace que la imagen cubra el espacio sin deformarse */
 }
 
 .user-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 10px);
   right: 0;
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
-  min-width: 200px;
-  z-index: 1000;
-  display: none;
+  min-width: 250px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: var(--transition);
 }
 
-.user-dropdown.active {
-  display: block;
+/* Corrección: Usa la clase 'show' del componente JS para una animación suave */
+.user-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.user-dropdown-header {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.user-dropdown-avatar {
+  width: 50px;
+  height: 50px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 15px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Estilos para la imagen de perfil en el menú desplegable */
+.user-dropdown-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-dropdown-info {
+  text-align: left;
+}
+
+.user-dropdown-name {
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.user-dropdown-email {
+  font-size: 14px;
+  color: var(--secondary-color);
+}
+
+.user-dropdown-role {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background-color: #eee;
 }
 
 .user-dropdown-item {
-  padding: 10px 15px;
-  border-bottom: 1px solid #eee;
+  width: 100%;
+  padding: 12px 15px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: var(--dark-color);
   cursor: pointer;
   transition: var(--transition);
+  display: flex;
+  align-items: center;
+  font-size: 14px;
 }
 
 .user-dropdown-item:hover {
   background-color: #f8f9fa;
 }
 
-.user-dropdown-item:last-child {
-  border-bottom: none;
+.user-dropdown-item.logout-item {
+  color: var(--danger-color);
+}
+
+.user-dropdown-item .logout-icon,
+.user-dropdown-item .change-photo-icon {
+  margin-right: 10px;
 }
 
 /* Sidebar */
@@ -150,65 +267,90 @@
   display: none;
 }
 
-/* Login */
+/* Login (Versión corregida y completa) */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f7fb;
+  padding: 20px;
+  background: linear-gradient(to bottom, #ffffff, #4a90e2); /* Fondo blanco a azul */
 }
 
 .login-form {
-  background-color: white;
-  padding: 30px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  padding: 40px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: #333; /* Texto oscuro para legibilidad */
 }
 
 .login-form h2 {
-  margin-bottom: 20px;
-  text-align: center;
-  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #2c3e50; /* Un azul oscuro para el título */
+}
+
+.login-form p {
+  margin-bottom: 30px;
+  color: #7f8c8d; /* Un gris para el subtítulo */
 }
 
 .error-message {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 10px;
-  border-radius: var(--border-radius);
+  background-color: #f8d7da; /* Fondo rojo claro */
+  color: #721c24; /* Texto rojo oscuro */
+  padding: 12px;
+  border-radius: 8px;
   margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+  text-align: left;
 }
 
 .login-button {
   width: 100%;
   padding: 12px;
-  background-color: var(--primary-color);
-  color: white;
+  background-color: #4a90e2; /* Fondo azul */
+  color: #ffffff; /* Texto blanco */
   border: none;
-  border-radius: var(--border-radius);
+  border-radius: 8px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
-  transition: var(--transition);
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
 }
 
 .login-button:hover {
-  background-color: var(--primary-dark);
+  background-color: #357abd; /* Azul más oscuro al pasar el ratón */
+}
+
+.login-button:disabled {
+  background-color: #aed6f1; /* Azul muy claro cuando está deshabilitado */
+  color: #85929e;
+  cursor: not-allowed;
 }
 
 .demo-credentials {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: var(--border-radius);
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eeeeee; /* Línea divisoria gris clara */
   font-size: 14px;
+  color: #555555; /* Texto gris oscuro para buena legibilidad */
+  text-align: left;
 }
 
 .demo-credentials p {
-  margin: 5px 0;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.demo-credentials strong {
+  color: #333333; /* Negrita en un color más oscuro */
 }
 
 /* Dashboard */
