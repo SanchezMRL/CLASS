@@ -10,119 +10,110 @@ const Schedule = () => {
   const { schedule, loading, error } = useSchedule();
   const weekDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const timeSlots = [
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
+    "08:00", "09:00", "10:00", "11:00", "12:00",
+    "13:00", "14:00", "15:00", "16:00", "17:00",
+    "18:00", "19:00", "20:00",
   ];
+
   const getScheduleForDayAndTime = (day, time) =>
     schedule.find((item) => item.day === day && item.time === time);
 
   return (
-    <div className="schedule-container">
+    <div>
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-      <div className="schedule-content">
+      <div className="d-flex">
         <Sidebar isOpen={sidebarOpen} />
-        <main
-          className={`main-content ${
-            sidebarOpen ? "sidebar-open" : "sidebar-closed"
-          }`}
-        >
-          <div className="schedule-header">
+        <main className={`main-content flex-grow-1 p-4 ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+          {/* --- Cabecera con Controles --- */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
             <h1>Horario de Clases</h1>
-            <div className="schedule-controls">
-              <div className="view-toggle">
-                <button
-                  className={viewMode === "week" ? "active" : ""}
-                  onClick={() => setViewMode("week")}
-                >
-                  Vista Semanal
-                </button>
-                <button
-                  className={viewMode === "day" ? "active" : ""}
-                  onClick={() => setViewMode("day")}
-                >
-                  Vista Diaria
-                </button>
-              </div>
+            <div className="btn-group" role="group">
+              <button
+                type="button"
+                className={`btn ${viewMode === "week" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => setViewMode("week")}
+              >
+                Vista Semanal
+              </button>
+              <button
+                type="button"
+                className={`btn ${viewMode === "day" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => setViewMode("day")}
+              >
+                Vista Diaria
+              </button>
             </div>
           </div>
+
+          {/* --- Contenido Principal --- */}
           {loading ? (
             <Loading />
           ) : error ? (
-            <div className="error-message">{error}</div>
+            <div className="alert alert-danger">{error}</div>
           ) : (
             <div className="schedule-view">
               {viewMode === "week" ? (
                 <div className="week-view">
-                  <div className="schedule-grid">
-                    <div className="time-column">
-                      <div className="time-header"></div>
-                      {timeSlots.map((time, index) => (
-                        <div key={index} className="time-slot">
-                          {time}
+                  <div className="container-fluid text-center">
+                    <div className="row g-0 border-top">
+                      {/* Columna de Horas */}
+                      <div className="col-1">
+                        <div className="p-2 fw-bold">Hora</div>
+                        {timeSlots.map((time, index) => (
+                          <div key={index} className="p-2 border-bottom small">
+                            {time}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Columnas de Días */}
+                      {weekDays.map((day, dayIndex) => (
+                        <div key={dayIndex} className="col">
+                          <div className="p-2 fw-bold border-start border-bottom">{day}</div>
+                          {timeSlots.map((time, timeIndex) => {
+                            const classItem = getScheduleForDayAndTime(day, time);
+                            return (
+                              <div key={timeIndex} className="p-1 border-start border-bottom" style={{ minHeight: '60px' }}>
+                                {classItem && (
+                                  <div className="card h-100 text-start">
+                                    <div className="card-body p-2">
+                                      <h6 className="card-title">{classItem.course}</h6>
+                                      <p className="card-text small">{classItem.topic}</p>
+                                      <span className="badge bg-primary text-dark">{classItem.time}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       ))}
                     </div>
-                    {weekDays.map((day, dayIndex) => (
-                      <div key={dayIndex} className="day-column">
-                        <div className="day-header">
-                          <h3>{day}</h3>
-                        </div>
-                        {timeSlots.map((time, timeIndex) => {
-                          const classItem = getScheduleForDayAndTime(day, time);
-                          return (
-                            <div key={timeIndex} className="schedule-cell">
-                              {classItem && (
-                                <div className="class-item">
-                                  <h4>{classItem.course}</h4>
-                                  <p>{classItem.topic}</p>
-                                  <span className="class-time">
-                                    {classItem.time}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ))}
                   </div>
                 </div>
               ) : (
                 <div className="day-view">
                   <h2>Horario de Hoy</h2>
-                  <div className="day-schedule">
+                  <div className="container">
                     {timeSlots.map((time, index) => {
                       const classItem = getScheduleForDayAndTime("Lunes", time);
                       return (
-                        <div key={index} className="day-time-slot">
-                          <div className="time-label">{time}</div>
-                          <div className="time-content">
+                        <div key={index} className="row g-0 border-bottom align-items-center">
+                          <div className="col-2 p-2 fw-bold">{time}</div>
+                          <div className="col-10 p-2">
                             {classItem ? (
-                              <div className="class-card">
-                                <h4>{classItem.course}</h4>
-                                <p>{classItem.topic}</p>
-                                <div className="class-details">
-                                  <span className="class-instructor">
-                                    {classItem.instructor}
-                                  </span>
-                                  <span className="class-room">
-                                    {classItem.room}
-                                  </span>
+                              <div className="card">
+                                <div className="card-body">
+                                  <h5 className="card-title">{classItem.course}</h5>
+                                  <p className="card-text">{classItem.topic}</p>
+                                  <div className="d-flex justify-content-between">
+                                    <span className="text-muted">{classItem.instructor}</span>
+                                    <span className="badge bg-secondary">{classItem.room}</span>
+                                  </div>
                                 </div>
                               </div>
                             ) : (
-                              <div className="empty-slot">Sin clases</div>
+                              <span className="text-muted">Sin clases</span>
                             )}
                           </div>
                         </div>
