@@ -1,6 +1,8 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+// Asegúrate de que esta línea apunte correctamente a tu archivo CSS
+import "../../styles/login.css"; 
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,8 +35,11 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h2>Aula Virtual - Iniciar Sesión</h2>
+        <h2>Aula Virtual</h2>
+        <p>Bienvenido de nuevo. Por favor, inicia sesión.</p>
+
         {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Correo Electrónico</label>
@@ -44,6 +49,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="ejemplo@correo.com"
             />
           </div>
           <div className="form-group">
@@ -54,18 +60,18 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder="••••••••"
             />
           </div>
           <button type="submit" className="login-button" disabled={isLoading}>
             {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </button>
         </form>
+
         <div className="demo-credentials">
           <p><strong>Credenciales de demostración:</strong></p>
-          <p><strong>Profesor:</strong></p>
-          <p>Email: profesor@aulavirtual.com | Contraseña: profesor123</p>
-          <p><strong>Alumno:</strong></p>
-          <p>Email: alumno@aulavirtual.com | Contraseña: alumno123</p>
+          <p><strong>Profesor:</strong> profesor@aulavirtual.com | <strong>Contraseña:</strong> profesor123</p>
+          <p><strong>Alumno:</strong> alumno@aulavirtual.com | <strong>Contraseña:</strong> alumno123</p>
         </div>
       </div>
     </div>
