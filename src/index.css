@@ -1397,3 +1397,41 @@ input:focus, select:focus, textarea:focus {
     justify-content: space-between;
   }
 }
+
+/* CORRECCIÓN PARA BOTONES */
+
+/* Botones Configuración */
+.settings-tabs button {
+  background-color: #f8f9fa; 
+  border: 1px solid #dee2e6; 
+  color: #495057; 
+}
+
+.settings-tabs button:hover {
+  background-color: #e9ecef; 
+  border-color: #adb5bd;
+}
+
+/* Botones Cursos */
+.filter-buttons button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.filter-buttons button:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Botones Horarios */
+.view-toggle button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.view-toggle button:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}

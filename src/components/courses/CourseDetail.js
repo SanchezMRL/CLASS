@@ -19,7 +19,9 @@ const CourseDetail = () => {
     4: false,
     5: false,
   });
-  const [expandedTopics, setExpandedTopics] = useState({ 'week3-topic1': true });
+  const [expandedTopics, setExpandedTopics] = useState({
+    "week3-topic1": true,
+  });
   const [isAddResourceModalOpen, setIsAddResourceModalOpen] = useState(false);
   const [selectedWeekForAdd, setSelectedWeekForAdd] = useState(null);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
@@ -32,20 +34,38 @@ const CourseDetail = () => {
 
   useEffect(() => {
     if (courses.length > 0) {
-      const foundCourse = courses.find((c) => c.id === parseInt(id));
+      const foundCourse = courses.find((c) => c.id === id);
       setCourse(foundCourse);
     }
   }, [id, courses]);
 
   useEffect(() => {
     const loadResources = async () => {
-      if (id) {
-        const resources = await resourceService.getCourseResources(parseInt(id));
+      if (id && user) {
+        const resources = await resourceService.getCourseResources(id);
+        
+        // Si es alumno, verificar qué tareas ya entregó
+        if (user.role === 'alumno') {
+          for (const weekKey in resources.weeks) {
+            const week = resources.weeks[weekKey];
+            for (const topic of week.topics) {
+              for (const resource of topic.resources) {
+                if (resource.type === 'assignment') {
+                  const hasSubmitted = await resourceService.hasSubmitted(resource.id, user.id);
+                  if (hasSubmitted) {
+                    resource.status = 'submitted';
+                  }
+                }
+              }
+            }
+          }
+        }
+        
         setCourseResources(resources);
       }
     };
     loadResources();
-  }, [id]);
+  }, [id, user]);
 
   const toggleWeek = (weekNumber) => {
     setExpandedWeeks((prev) => ({ ...prev, [weekNumber]: !prev[weekNumber] }));
@@ -62,24 +82,31 @@ const CourseDetail = () => {
 
   const handleResourceAdded = async (resourceData) => {
     await resourceService.addResource(
-      parseInt(id), 
-      selectedWeekForAdd, 
-      1, 
+      id,
+      selectedWeekForAdd,
+      1,
       resourceData
     );
-    const updatedResources = await resourceService.getCourseResources(parseInt(id));
+    const updatedResources = await resourceService.getCourseResources(id);
     setCourseResources(updatedResources);
   };
 
   const handleDeleteResource = async (weekNumber, topicId, resourceId) => {
-    if (window.confirm('¿Estás seguro de eliminar este recurso?')) {
-      await resourceService.deleteResource(parseInt(id), weekNumber, topicId, resourceId);
-      const updatedResources = await resourceService.getCourseResources(parseInt(id));
+    if (window.confirm("¿Estás seguro de eliminar este recurso?")) {
+      await resourceService.deleteResource(
+        id,
+        weekNumber,
+        topicId,
+        resourceId
+      );
+      const updatedResources = await resourceService.getCourseResources(id);
       setCourseResources(updatedResources);
     }
   };
 
   const handleOpenAssignment = (assignment) => {
+    console.log('🎯 handleOpenAssignment - assignment completo:', assignment);
+    console.log('📦 Submissions en assignment:', assignment.submissions);
     setSelectedAssignment(assignment);
     setIsAssignmentModalOpen(true);
   };
@@ -87,19 +114,28 @@ const CourseDetail = () => {
   const handleSubmitAssignment = async (submissionData) => {
     if (selectedAssignment && selectedWeekForAdd) {
       await resourceService.submitAssignment(
-        parseInt(id),
+        id,
         selectedWeekForAdd,
         1,
         selectedAssignment.id,
         submissionData
       );
-      const updatedResources = await resourceService.getCourseResources(parseInt(id));
+      const updatedResources = await resourceService.getCourseResources(id);
       setCourseResources(updatedResources);
     }
   };
 
   const getWeekResources = (weekNumber) => {
     return courseResources.weeks[weekNumber] || null;
+  };
+
+  const handleViewResource = async (resource) => {
+    console.log('Ver recurso:', resource);
+    if (resource.url && resource.url !== '#') {
+      window.open(resource.url, '_blank');
+    } else {
+      alert('Este recurso no tiene archivo adjunto');
+    }
   };
 
   if (loading) {
@@ -225,8 +261,9 @@ const CourseDetail = () => {
                     18,
                   ].map((weekNum) => {
                     const weekData = getWeekResources(weekNum);
-                    const hasTopic = weekData && weekData.topics && weekData.topics.length > 0;
-                    
+                    const hasTopic =
+                      weekData && weekData.topics && weekData.topics.length > 0;
+
                     return (
                       <div key={weekNum} className="week-item">
                         <button
@@ -250,31 +287,44 @@ const CourseDetail = () => {
                                 <div key={topic.id} className="topic-item">
                                   <button
                                     className={`topic-header ${
-                                      expandedTopics[`week${weekNum}-topic${topic.id}`]
+                                      expandedTopics[
+                                        `week${weekNum}-topic${topic.id}`
+                                      ]
                                         ? "expanded"
                                         : ""
                                     }`}
                                     onClick={() =>
-                                      toggleTopic(`week${weekNum}-topic${topic.id}`)
+                                      toggleTopic(
+                                        `week${weekNum}-topic${topic.id}`
+                                      )
                                     }
                                   >
                                     <span className="topic-title">
                                       {topic.name}
                                     </span>
                                     <span className="toggle-icon">
-                                      {expandedTopics[`week${weekNum}-topic${topic.id}`]
+                                      {expandedTopics[
+                                        `week${weekNum}-topic${topic.id}`
+                                      ]
                                         ? "▲"
                                         : "▼"}
                                     </span>
                                   </button>
 
-                                  {expandedTopics[`week${weekNum}-topic${topic.id}`] && (
+                                  {expandedTopics[
+                                    `week${weekNum}-topic${topic.id}`
+                                  ] && (
                                     <div className="topic-content">
                                       {topic.resources.map((resource) => (
-                                        <div key={resource.id} className="resource-item-detail">
+                                        <div
+                                          key={resource.id}
+                                          className="resource-item-detail"
+                                        >
                                           <div className="resource-left">
                                             <span className="resource-icon-doc">
-                                              {resource.type === 'assignment' ? '📝' : '📄'}
+                                              {resource.type === "assignment"
+                                                ? "📝"
+                                                : "📄"}
                                             </span>
                                             <div className="resource-info-detail">
                                               <span className="resource-type">
@@ -286,30 +336,49 @@ const CourseDetail = () => {
                                             </div>
                                           </div>
                                           <div className="resource-right">
-                                            {resource.type === 'assignment' ? (
+                                            {resource.type === "assignment" ? (
                                               <>
-                                                <span className={`status-badge ${resource.status}`}>
-                                                  {resource.status === 'submitted' ? '✓ Entregado' : 
-                                                   resource.status === 'pending' ? '⏳ Pendiente' : '📝 Nueva'}
+                                                <span
+                                                  className={`status-badge ${resource.status}`}
+                                                >
+                                                  {resource.status ===
+                                                  "submitted"
+                                                    ? "✓ Entregado"
+                                                    : resource.status ===
+                                                      "pending"
+                                                    ? "⏳ Pendiente"
+                                                    : "📝 Nueva"}
                                                 </span>
                                                 {resource.deadline ? (
                                                   <span className="deadline-info">
-                                                    Hasta: {new Date(resource.deadline.to).toLocaleDateString('es-ES', { 
-                                                      day: 'numeric', 
-                                                      month: 'long', 
-                                                      year: 'numeric',
-                                                      hour: '2-digit',
-                                                      minute: '2-digit'
-                                                    })}
+                                                    Hasta:{" "}
+                                                    {new Date(
+                                                      resource.deadline.to
+                                                    ).toLocaleDateString(
+                                                      "es-ES",
+                                                      {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                      }
+                                                    )}
                                                   </span>
                                                 ) : (
-                                                  <span className="no-deadline">Sin fecha límite</span>
+                                                  <span className="no-deadline">
+                                                    Sin fecha límite
+                                                  </span>
                                                 )}
-                                                <button 
+                                                <button
                                                   className="view-assignment-btn"
                                                   onClick={() => {
-                                                    setSelectedWeekForAdd(weekNum);
-                                                    handleOpenAssignment(resource);
+                                                    setSelectedWeekForAdd(
+                                                      weekNum
+                                                    );
+                                                    handleOpenAssignment(
+                                                      resource
+                                                    );
                                                   }}
                                                 >
                                                   Ver detalles
@@ -323,20 +392,24 @@ const CourseDetail = () => {
                                                 <span className="no-deadline">
                                                   Sin fecha límite
                                                 </span>
-                                                <a 
-                                                  href={resource.url} 
-                                                  target="_blank" 
-                                                  rel="noopener noreferrer"
+                                                <button
+                                                  onClick={() => handleViewResource(resource)}
                                                   className="view-resource-btn"
                                                 >
                                                   Ver
-                                                </a>
+                                                </button>
                                               </>
                                             )}
-                                            {user.role === 'profesor' && (
-                                              <button 
+                                            {user.role === "profesor" && (
+                                              <button
                                                 className="delete-resource-btn"
-                                                onClick={() => handleDeleteResource(weekNum, topic.id, resource.id)}
+                                                onClick={() =>
+                                                  handleDeleteResource(
+                                                    weekNum,
+                                                    topic.id,
+                                                    resource.id
+                                                  )
+                                                }
                                               >
                                                 🗑️
                                               </button>
@@ -353,10 +426,10 @@ const CourseDetail = () => {
                                 <p>No hay recursos en esta semana</p>
                               </div>
                             )}
-                            
-                            {user.role === 'profesor' && (
+
+                            {user.role === "profesor" && (
                               <div className="add-resource-section">
-                                <button 
+                                <button
                                   className="add-resource-btn"
                                   onClick={() => handleAddResource(weekNum)}
                                 >
